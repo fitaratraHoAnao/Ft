@@ -25,4 +25,15 @@ config = {
   "adminOnly": False, # default False
 }
 ```
+or you can also use this config
+```python
+config = dict(
+  name = 'echo',
+  function = myFunction, # not 'def'
+  author = 'Muhammad Greeg',
+  usage = "{p}echo [text]",
+  description = "Your description...",
+  usePrefix = False,
+  adminOnly = False
+)
 ```

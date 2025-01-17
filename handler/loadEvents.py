@@ -18,15 +18,15 @@ def loadEvents():
       event_type = config.get('event')
       function = config.get('def')
       if not event_type:
-        print(f"\033[0;93m({file}) \033[97mEVENT NOT LOADED - \033[0;31mMissing event type")
+        print(f"\033[31m[EVENT]:{file} \033[0mNOT LOADED - mMissing event type")
       elif not function:
-        print(f"\033[0;93m({file}) \033[97mEVENT NOT LOADED - \033[0;31mMissing event function")
+        print(f"\033[31m[EVENT]:{file} \033[0mNOT LOADED - Missing event function")
       else:
         if not event_type.startswith('type:'):
-          print(f"\033[0;93m({file}) \033[97mEVENT NOT LOADED - \033[0;31mInvalid event type")
+          print(f"\033[31m[EVENT]:{file} \033[0mNOT LOADED - Invalid event type")
         else:
           config["event"] = config["event"].lower()
           events.append(config)
-          print(f"\033[0;97mEVENT LOADED: \033[0;32m{file}\033[0m")
+          print(f"\033[36m[EVENT] \033[0mLOADED \033[33m{file}")
   print()
   return events
