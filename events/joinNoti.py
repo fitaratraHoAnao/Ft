@@ -7,7 +7,7 @@ async def bagong_tao(bot, event):
     typ = event['thread_type']
     for fbuser in data.get('addedParticipants'):
       if fbuser['userFbId'] == bot.uid:
-        await bot.shareContact(event.font(":mono[Thank you for adding me.]"), bot.uid, tid)
+        await bot.shareContact("Thank you for adding me.", bot.uid, tid)
     else:
       fbuser = data.get('addedParticipants')[0]
       name = fbuser['fullName']

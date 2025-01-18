@@ -4,7 +4,6 @@ async def function(bot, data):
   typ = data.get('thread_type')
   def check(text):
     return True if text in message.lower() else False
-  
   if check("junmar"):
     return await bot.sendMessage("Junmar bakla!!", tid, typ)
   elif check("greegmon") or check(' greeg '):

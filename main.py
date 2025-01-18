@@ -1,5 +1,6 @@
 import asyncio
 import json
+import threading
 from fbchat_muqit import (
   Client,
   Message,
@@ -13,8 +14,10 @@ from handler.loadEvents import loadEvents
 from handler.loadCommands import loadCommands
 from handler.messageHandler import handleMessage
 from handler.eventHandler import handleEvent
+from app import startapp
 
 config = json.load(open('config.json', 'r'))
+bot_running = False
 
 class Greeg(Client):
   def BOT(self, data):
@@ -34,6 +37,7 @@ class Greeg(Client):
     print(f"\033[0;91m[ERROR] \033[0m{message}")
   async def onListening(self):
     print("\033[32m[BOT] \033[0mListening...")
+    print("LISTEN: ", bot_running)
     print()
   async def __botEvent(self, event, **data):
     asyncio.create_task(handleEvent(self, event.lower(), **data))
@@ -51,8 +55,7 @@ class Greeg(Client):
   """OTHER EVENTS"""
   async def onPeopleAdded(self, **data):
     await self.__botEvent("type:addedParticipants",thread_type=ThreadType.GROUP, **data)
-  
-  
+
 async def main():
   cookies_path = "fbstate.json"
   bot = await Greeg.startSession(cookies_path)
@@ -66,9 +69,30 @@ async def main():
   try:
     await bot.listen()
   except FBchatException as g:
+    stopbot() # <--
     bot.error("[FBchatException] - {}".format(g))
   except Exception as e:
+    stopbot() # <--
     print("\033[0;91m[BOT] \033[0mAn error occured while trying to login, please check your bot account or get a new fbstate")
 
-if __name__ == '__main__':
+def startbot():
+  global bot_running
+  print("START: ", bot_running)
+  bot_running = True
   asyncio.run(main())
+def stopbot():
+  global bot_running
+  if bot_running:
+    bot_running = False
+def restartbot():
+  stopbot()
+  print("RESTART: ", bot_running)
+  th = threading.Thread(target=startbot)
+  th.start()
+
+if __name__ == '__main__':
+  lubot = threading.Thread(target=startbot)
+  lubot.start()
+  
+  app = startapp(restartbot)
+  app.run(debug=False, host='0.0.0.0')
