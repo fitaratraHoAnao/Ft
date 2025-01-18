@@ -52,6 +52,13 @@ async def handleMessage(bot,mid,author_id,message,message_object,thread_id,threa
       elif is_admin_only and str(author_id) not in bot.admin:
         return await bot.sendMessage(text_formatter(":mono[You dont have permission to use this command.]"), thread_id, thread_type)
       else:
+        mtg = f"[blue]ThreadID : [/blue] {thread_id}\n"
+        mtg += f"[blue]Command  : [/blue] [yellow]{cnp}[/yellow]"
+        pnl = bot.logInfo(mtg, title=author_id)
         return await function['def'](bot, message_data)
+  except bot.FBchatFacebookError as err:
+    bot.error(f"{err}", 'FBchatFacebookError')
+  except bot.FBchatException as err:
+    bot.error(f"{err}", 'FBchatException')
   except Exception as err:
-    print("\033[0;91m[ERROR][messageHandler] \033[0m{}".format(err))
+    bot.error(f"{err}", 'Exception')

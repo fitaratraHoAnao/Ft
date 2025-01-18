@@ -1,5 +1,7 @@
 import json
 import asyncio
+from rich.console import Console
+from rich.panel import Panel
 
 async def loadConfig(botName=None):
   data = {
@@ -10,7 +12,7 @@ async def loadConfig(botName=None):
       61571117768115
     ]
   }
-  print(f"\033[97m⦿━━━━━━━━━━━━━━━⦿ \033[96mLoad Config \033[97m⦿━━━━━━━━━━━━━━━⦿")
+  message = ""
   try:
     config = json.load(open('config.json', 'r'))
   except FileNotFoundError:
@@ -18,26 +20,25 @@ async def loadConfig(botName=None):
     return data
   await asyncio.sleep(0.2)
   prefix = config.get('prefix', '')
-  if not prefix:
-    print("\033[0;36m[CONFIG] \033[0mNo prefix")
-    prefix = ''
-  elif not isinstance(prefix, str):
-    print("\033[0;31m[CONFIG] \033[0mInvalid prefix data types")
+  if not isinstance(prefix, str):
+    message += f"[red]PREFIX[/red] Invalid prefix data type\n"
     prefix = ''
   elif ' ' in list(prefix):
     prefix = ''
-    print("\033[0;31m[CONFIG] \033[0mPrefix must not include space")
+    message += f"[red]PREFIX[/red] Prefix must not include space\n"
   else:
-    print(f"\033[0;36m[CONFIG] \033[0mPrefix loaded    : \033[1;97m{prefix}")
+    message += f"[blue]PREFIX[/blue] {prefix if prefix else 'No prefix'}\n"
   
   botName = config.get('botName', data['botName'])
-  print(f"\033[0;36m[CONFIG] \033[0mBot name loaded  : \033[1;97m{botName}")
+  message += f"[blue]NAME[/blue] {botName}\n"
   owner = config.get("owner", data['owner'])
-  print(f"\033[0;36m[CONFIG] \033[0mBot owner loaded : \033[1;97m{owner}")
+  message += f"[blue]OWNER[/blue] {owner}\n"
   _admin = config.get("admin", data['admin'])
   admin = [str(ad) for ad in _admin if isinstance(ad, int) or isinstance(ad, str)]
-  print(f"\033[0;36m[CONFIG] \033[0mBot admin loaded : \033[1;97m{len(admin)}")
+  message += f"[blue]ADMIN[/blue] {','.join(admin)}\n"
   
+  panel = Panel(message[:-1], title="BOT CONFIG", border_style="royal_blue1")
+  Console().print(panel)
   data['prefix'] = prefix
   data['botName'] = botName
   data['owner'] = owner

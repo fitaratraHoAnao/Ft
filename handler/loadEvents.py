@@ -1,5 +1,7 @@
 import os
 import importlib
+from rich.console import Console
+from rich.panel import Panel
 
 events = []
 
@@ -7,9 +9,10 @@ def loadEvents():
   global events
   if events:
     return events
+  console = Console()
   files = list(filter(lambda file: file.endswith('.py') and
   file!='__init__.py',os.listdir('./events')))
-  print("\033[97m⦿━━━━━━━━━━━━━━━⦿ \033[96mLoad Events\033[97m ⦿━━━━━━━━━━━━━━━⦿")
+  message = ""
   for file in files:
     filepath = f"events.{os.path.splitext(file)[0]}"
     module = importlib.import_module(filepath)
@@ -18,15 +21,17 @@ def loadEvents():
       event_type = config.get('event')
       function = config.get('def')
       if not event_type:
-        print(f"\033[31m[EVENT]:{file} \033[0mNOT LOADED - mMissing event type")
+        message += f"[bold red]ERROR[/bold red] [red]{file} [white]- Missing event type\n"
       elif not function:
-        print(f"\033[31m[EVENT]:{file} \033[0mNOT LOADED - Missing event function")
+        message += f"[bold red]ERROR[/bold red] [red]{file} [white]- Missing event function\n"
       else:
         if not event_type.startswith('type:'):
-          print(f"\033[31m[EVENT]:{file} \033[0mNOT LOADED - Invalid event type")
+          message += f"[bold red]ERROR[/bold red] [red]{file} [white]- Missing event function\n"
         else:
           config["event"] = config["event"].lower()
           events.append(config)
-          print(f"\033[36m[EVENT] \033[0mLOADED \033[33m{file}")
+          message += f"[blue]EVENT[/blue] Loaded [yellow]{file}[/yellow]\n"
+  panel = Panel(message[:-1], title="EVENTS", border_style="royal_blue1")
+  console.print(panel)
   print()
   return events

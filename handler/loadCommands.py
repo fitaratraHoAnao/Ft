@@ -1,5 +1,7 @@
 import os
 import importlib
+from rich.console import Console
+from rich.panel import Panel
 
 commands = {}
 
@@ -7,8 +9,9 @@ def loadCommands(_prefix):
   global commands
   if commands:
     return commands
+  console = Console()
   files = list(filter(lambda file: file.endswith('.py') and file!='__init__.py',os.listdir('./commands')))
-  print("\033[97m⦿━━━━━━━━━━━━━━━⦿ \033[96mLoad Commands\033[97m ⦿━━━━━━━━━━━━━━━⦿")
+  message = ""
   for file in files:
     filepath = f"commands.{os.path.splitext(file)[0]}"
     module = importlib.import_module(filepath)
@@ -21,27 +24,29 @@ def loadCommands(_prefix):
         config['def'] = config.get('function')
         del config['function']
       if not name:
-        print(f"\033[31m[COMMAND]\033[0m{file} NOT LOADED - Missing command name")
+        message += f"[bold red]ERROR[/bold red] [red]{file} [white]- Missing command name\n"
       elif not function:
-        print(f"\033[31m[COMMAND]\033[0m{file} NOT LOADED - Missing command function")
+        message += f"[bold red]ERROR[/bold red] [red]{file} [white]- Missing command function\n"
       else:
         usePrefix = config.get('usePrefix', True)
         if not name.isalnum():
-          print(f"\033[31m[COMMAND]\033[0m{file} NOT LOADED - Invalid command name")
+          message += f"[bold red]ERROR[/bold red] [red]{file} [white]- Invalid command name\n"
         elif name.lower() in commands:
-          print(f"\033[31m[COMMAND]\033[0m{file} NOT LOADED - Command name already exist")
+          message += f"[bold red]ERROR[/bold red] [red]{file} [white]- Command '{name}' already exist\n"
         elif usePrefix not in [True, False]:
-          print(f"\033[31m[COMMAND]\033[0m{file} NOT LOADED - Invalid usePrefix value")
+          message += f"[bold red]ERROR[/bold red] [red]{file} [white]- Invalid usePrefix value\n"
         else:
-          admin_only = config.get('admin_only', False)
+          message += f"[blue]COMMAND[/blue] Loaded [yellow]{name.lower()}[/yellow] ({file})\n"
+          admin_only = config.get('adminOnly', False)
           if not admin_only in [True,False]:
             admin_only = False
-            print(f"\033[0m   - Invalid 'adminOnly' key in config, It will automatically set to False")
-          config['admin_only'] = admin_only if admin_only in [True, False] else False
+            message += f"╰─── Invalid usePrefix value\n"
+          config['adminOnly'] = admin_only if admin_only in [True, False] else False
           
           config["usage"] = config.get("usage", "").replace('{p}', _prefix)
           config["description"] = config.get("description", 'No description.').replace('{p}', _prefix)
           commands[name.lower()] = config
-          print(f"\033[36m[COMMAND] \033[0mLOADED \033[33m{name} \033[0m- \033[35m({file})\033[0m")
+  panel = Panel(message[:-1], title="COMMANDS", border_style='royal_blue1')
+  console.print(panel)
   print()
   return commands

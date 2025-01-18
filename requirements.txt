@@ -2,3 +2,4 @@ fbchat-muqit
 requests
 bs4
 dataset
+rich
