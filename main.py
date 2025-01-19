@@ -46,22 +46,53 @@ class Greeg(Client):
   async def onListening(self):
     print("\033[32m[BOT] \033[0mListening...")
     print()
-  async def __botEvent(self, event, **data):
+  async def _botEvent(self, event, **data):
     asyncio.create_task(handleEvent(self, event.lower(), **data))
-  async def __messaging(self, mid, author_id, message, message_object, thread_id, thread_type, **kwargs):
+  async def _messaging(self, mid, author_id, message, message_object, thread_id, thread_type, **kwargs):
     if author_id != self.uid:
-      await self.__botEvent('type:message', mid=mid,author_id=author_id,message=message,message_object=message_object,thread_id=thread_id,thread_type=thread_type,**kwargs)
+      await self._botEvent('type:message', mid=mid,author_id=author_id,message=message,message_object=message_object,thread_id=thread_id,thread_type=thread_type,**kwargs)
       asyncio.create_task(handleMessage(self,mid,author_id,message,message_object,thread_id,thread_type,**kwargs))
   
   """MESSAGE EVENTS"""
   async def onReply(self, mid, author_id, message, message_object, thread_id,thread_type, **kwargs):
-    await self.__messaging(mid, author_id, message, message_object, thread_id,  thread_type, **kwargs)
+    await self._messaging(mid, author_id, message, message_object, thread_id,  thread_type, **kwargs)
   async def onMessage(self,mid,author_id,message,message_object,thread_id,thread_type,**kwargs):
-    await self.__messaging(mid, author_id, message, message_object, thread_id,  thread_type, **kwargs)
+    await self._messaging(mid, author_id, message, message_object, thread_id,  thread_type, **kwargs)
   
   """OTHER EVENTS"""
   async def onPeopleAdded(self, **data):
-    await self.__botEvent("type:addedParticipants",thread_type=ThreadType.GROUP, **data)
+    await self._botEvent("type:peopleAdded",thread_type=ThreadType.GROUP, **data)
+  async def onPersonRemoved(self, **data):
+    # somebody removes a person from a group thread.
+    await self._botEvent("type:personRemoved",thread_type=ThreadType.GROUP, **data)
+  async def onPendingMessage(self, **data):
+    # somebody that isn’t connected with you on either Facebook or Messenger sends a message. After that, you need to use fetchThreadList to actually read the message.
+    await self._botEvent("type:pendingMessage", **data)
+  async def onColorChange(self, **data):
+    # somebody changes a thread’s color.
+    await self._botEvent("type:colorChange", **data)
+  async def onEmojiChange(self, **data):
+    # somebody changes a thread’s emoji.
+    await self._botEvent("type:emojiChange", **data)
+  async def onTitleChange(self, **data):
+    # and somebody changes a thread’s title.
+    await self._botEvent("type:titleChange", **data)
+  async def onImageChange(self, **data):
+    # somebody changes a thread’s image.
+    await self._botEvent("type:imageChange", **data)
+  async def onNicknameChange(self, **data):
+    # somebody changes a nickname.
+    await self._botEvent("type:nicknameChange", **data)
+  async def onAdminAdded(self, **data):
+    # somebody adds an admin to a group.
+    await self._botEvent("type:adminAdded", **data)
+  async def onAdminRemoved(self, **data):
+    # somebody is removed as an admin in a group.
+    await self._botEvent("type:adminRemoved", **data)
+  async def onMessageUnsent(self, **data):
+    # someone unsends (deletes for everyone) a message.
+    await self._botEvent("type:messageUnsent", **data)
+  
 
 async def main():
   cookies_path = "fbstate.json"
@@ -78,10 +109,11 @@ async def main():
     stopbot() # <--
     bot.error("{}".format(g), title="FBchatException")
   except FBchatFacebookError as g:
+    stopbot() # <--
     bot.error("{}".format(g), title="FBchatFacebookError")
   except Exception as e:
     stopbot() # <--
-    print("\033[0;91m[BOT] \033[0mAn error occured while trying to login, please check your bot account or get a new fbstate")
+    bot.error(f"An error occured while trying to login, please check your bot account or get a new fbstate.\n\n{e}", title="Exception")
 
 def stopbot():
   global bot_running

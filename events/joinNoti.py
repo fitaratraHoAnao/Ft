@@ -17,7 +17,7 @@ async def bagong_tao(bot, event):
     bot.error(err)
 
 config = {
-  "event": "type:addedParticipants",
+  "event": "type:peopleAdded",
   "def": bagong_tao,
   "author": "Muhammad Greeg"
 }

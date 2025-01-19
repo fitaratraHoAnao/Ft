@@ -16,11 +16,6 @@
         <b>Commands: </b>{{ bot.commands }} <br>
         <b>Events: </b>{{ bot.events }}
       </div>
-    {% else %}
-      <div class="alert alert-danger" role='alert'>
-        Bot is not online<br>
-        {{ bot }}
-      </div>
     {% endif %}
     <form class="form-control" method="POST" action="/api/bobot">
       <div class="form-group">

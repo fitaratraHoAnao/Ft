@@ -36,7 +36,7 @@ def loadCommands(_prefix):
         elif usePrefix not in [True, False]:
           message += f"[bold red]ERROR[/bold red] [red]{file} [white]- Invalid usePrefix value\n"
         else:
-          message += f"[blue]COMMAND[/blue] Loaded [yellow]{name.lower()}[/yellow] ({file})\n"
+          message += f"[blue]COMMAND[/blue] Loaded [yellow]{name.lower()}[/yellow] - {file}\n"
           admin_only = config.get('adminOnly', False)
           if not admin_only in [True,False]:
             admin_only = False
@@ -48,5 +48,4 @@ def loadCommands(_prefix):
           commands[name.lower()] = config
   panel = Panel(message[:-1], title="COMMANDS", border_style='royal_blue1')
   console.print(panel)
-  print()
   return commands

@@ -33,5 +33,4 @@ def loadEvents():
           message += f"[blue]EVENT[/blue] Loaded [yellow]{file}[/yellow]\n"
   panel = Panel(message[:-1], title="EVENTS", border_style="royal_blue1")
   console.print(panel)
-  print()
   return events

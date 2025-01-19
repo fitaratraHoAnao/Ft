@@ -1,20 +1,27 @@
-def byPage(commands, page=1):
+def byPage(commands,j, page=1):
   message = f"╭─── :bold[COMMANDS] ───\n"
   for cmd in commands[page-1]:
-    message += f"│ ○ {cmd}\n"
+    message += f"│ {'○' if not j[cmd] else '⌬'} {cmd}\n"
   message += f"╰────{'─'*len('COMMANDS')}───\n"
   message += f"📖 Page: ({page}/{len(commands)})\n"
   return message
 
-def getAll(commands):
+def getAll(commands,j):
   message = f"╭─── :bold[COMMANDS] ───\n"
+  dal = list()
   for cmd in commands:
-    message += f"│ ○ {cmd}\n"
+    if j[cmd]:
+      dal.insert(0, cmd)
+    else:
+      dal.append(cmd)
+  for cmd in dal:
+    message += f"│ {'○' if not j[cmd] else '⌬'} {cmd}\n"
   message += f"╰────{'─'*len('COMMANDS')}───\n"
   return message
   
 
 async def function(bot, event):
+  xzxc = {key:udo['adminOnly'] for key, udo in bot.commands.items()}
   commands = list(map(lambda x: x,bot.commands))
   chunk = 15
   COMMANDS = [commands[i:i+chunk] for i in range(0, len(commands), chunk)]
@@ -25,7 +32,7 @@ async def function(bot, event):
     return await event.sendReply("ⓘ Invalid command usage, type 'help help' to see how to use this command.")
   
   if sub.lower() == 'all':
-    message = getAll(commands)
+    message = getAll(commands, xzxc)
     message += f"📦 Total commands: {len(commands)}\n"
     message += f"ⓘ 𝖨𝖿 𝗒𝗈𝗎 𝗁𝖺𝗏𝖾 𝖺𝗇𝗒 𝗊𝗎𝖾𝗌𝗍𝗂𝗈𝗇𝗌 𝗈𝗋 𝗇𝖾𝖾𝖽 𝖺𝗌𝗌𝗂𝗌𝗍𝖺𝗇𝖼𝖾, 𝗉𝗅𝖾𝖺𝗌𝖾 𝖼𝗈𝗇𝗍𝖺𝖼𝗍 𝗍𝗁𝖾 𝖽𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋."
     return await event.sendReply(message, True)
@@ -51,7 +58,7 @@ async def function(bot, event):
   if sub:
     if len(COMMANDS) < int(sub) or len(COMMANDS) > int(sub):
         return await event.sendReply(f"Page {sub} is not defined, total command page {len(COMMANDS)}")
-  message = byPage(COMMANDS, page=int(sub) if sub else 1)
+  message = byPage(COMMANDS, xzxc, page=int(sub) if sub else 1)
   message += f"📦 Total commands: {len(commands)}\n"
   message += f"ⓘ 𝖨𝖿 𝗒𝗈𝗎 𝗁𝖺𝗏𝖾 𝖺𝗇𝗒 𝗊𝗎𝖾𝗌𝗍𝗂𝗈𝗇𝗌 𝗈𝗋 𝗇𝖾𝖾𝖽 𝖺𝗌𝗌𝗂𝗌𝗍𝖺𝗇𝖼𝖾, 𝗉𝗅𝖾𝖺𝗌𝖾 𝖼𝗈𝗇𝗍𝖺𝖼𝗍 𝗍𝗁𝖾 𝖽𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋."
   return await event.sendReply(message, True)
