@@ -1,7 +1,18 @@
 import re
 import requests
+from bs4 import BeautifulSoup
+from rich.console import Console
+from rich.panel import Panel
 
 user_agent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36"
+
+# Console
+class PrintBox:
+  def __init__(self, title="Panel", border_style='white'):
+    self.title = title
+    self.border_style = border_style
+  def message(self, message):
+    Console().print(Panel(message, title=self.title, border_style=self.border_style))
 
 # Text fonts
 def font(type, text):
@@ -76,3 +87,20 @@ def getUid(link):
     if match:
       return match.group(0)
   return {"error": 'Couldn\'t get the user id'}
+
+# get the name
+def getName(uid):
+  try:
+    response = requests.get(f"https://facebook.com/{uid}", headers={
+      "User-Agent": 'Mozilla/5.0 (Windows; U; Windows NT 5.0; de-AT; rv:1.7.11) Gecko/20050728'
+    })
+    html = BeautifulSoup(response.text, 'html.parser')
+    title = html.find('title').get_text().strip()
+    if 'error' not in title.lower() and 'facebook' not in title.lower() and title != 'Facebook':
+      name = title
+    else:
+      name = 'Facebook User'
+    return name
+  except Exception as e:
+    print(e)
+    return 'Facebook User'

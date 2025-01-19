@@ -1,7 +1,29 @@
+from database import User
 from util import (
-  text_formatter
+  text_formatter,
+  getName
 )
 import os
+
+async def get_name(fetchName, uid):
+  try:
+    Users = User()
+    userX = Users.get(uid)
+    if userX:
+      if userX != 'Facebook User':
+        return userX.get('name')
+    else:
+      nameX = getName(uid)
+      if nameX != 'Facebook User':
+        Users.add(uid, nameX)
+        return nameX
+      fetch = await fetchName(uid)
+      tao = fetch.get(uid)
+      name = tao.name
+      Users.add(uid, name)
+      return name
+  except Exception as e:
+    return "Facebook User"
 
 class MessageData:
   def __init__(self, **data):
@@ -23,6 +45,9 @@ class MessageData:
     
     if self.message_object.replied_to:
       self.reply = self.message_object.replied_to
+  async def getName(self, uid):
+    name = await get_name(self.bot.fetchUserInfo, self.uid)
+    return name
   async def sendReply(self, message, auto_font=False, mentions=None):
     text = self.font(message) if auto_font else message
     return await self.bot.sendMessage(text, self.thread_id, self.thread_type, reply_to_id=self.mid, mentions=mentions)
@@ -34,17 +59,6 @@ async def handleMessage(bot,mid,author_id,message,message_object,thread_id,threa
     cnp = cmd if bot.prefix == "" or not cmd.startswith(bot.prefix) else cmd[1:];cnp = cnp.lower()
     if cnp in bot.commands:
       function = bot.commands[cnp]
-      message_data = MessageData(
-        cmd = cnp,
-        args = args,
-        mid = mid,
-        client = bot,
-        author_id = author_id,
-        message = message,
-        message_object = message_object,
-        thread_id = thread_id,
-        thread_type = thread_type
-      )
       is_need_prefix = function.get('usePrefix', True)
       is_admin_only = function.get('adminOnly', False)
       if bot.prefix != '' and is_need_prefix and not cmd.startswith(bot.prefix):
@@ -52,7 +66,21 @@ async def handleMessage(bot,mid,author_id,message,message_object,thread_id,threa
       elif is_admin_only and str(author_id) not in bot.admin:
         return await bot.sendMessage(text_formatter(":mono[You dont have permission to use this command.]"), thread_id, thread_type)
       else:
+        sender = await get_name(bot.fetchUserInfo, author_id)
+        message_data = MessageData(
+          cmd = cnp,
+          args = args,
+          mid = mid,
+          client = bot,
+          author_name = sender,
+          author_id = author_id,
+          message = message,
+          message_object = message_object,
+          thread_id = thread_id,
+          thread_type = thread_type
+        )
         mtg = f"[blue]ThreadID : [/blue] {thread_id}\n"
+        mtg += f"[blue]Sender   : [/blue] {sender}\n"
         mtg += f"[blue]Command  : [/blue] [yellow]{cnp}[/yellow]"
         pnl = bot.logInfo(mtg, title=author_id)
         return await function['def'](bot, message_data)

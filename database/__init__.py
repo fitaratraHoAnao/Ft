@@ -1,5 +1,12 @@
 import dataset
 import datetime
+import requests
+import asyncio
+from bs4 import BeautifulSoup
+from util import PrintBox, getName
+
+log = PrintBox(title="DATABASE", border_style="green")
+  
 
 class Thread:
   def __init__(self, thread_id):
@@ -39,24 +46,39 @@ class Database:
   def upsert(self, row, keys):
     self.db.upsert(row, keys)
 
-class Bank(Database):
-  def __init__(self, uid):
-    self.uid = uid
-    
-    super().__init__('bank')
-    if not self.find_one(uid=self.uid):
-      self._new()
+
+class User(Database):
+  def __init__(self):
+    super().__init__('users')
   
-  def _new(self):
+  def _new(self, uid, name):
     self.upsert(dict(
-      uid = self.uid,
-      money = 200, # default
+      uid = uid,
+      name = name,
+      points = 0, # Coming soon
+      money = 200, # Bank system
     ), ['uid'])
-    print(f"\033[32m[BANK] \033[0mNew data - \033[96m{self.uid}")
+    log.border_style = 'green'
+    log.message(f"New user - [yellow]{uid}[/yellow] | [yellow]{name}[/yellow]")
   
+  def get(self, uid):
+    user = self.find_one(uid=uid)
+    return user
+  def add(self, uid, name='Facebook User'):
+    if not self.get(uid):
+      if name == 'Facebook User':
+        name = getName(uid)
+      self._new(uid, name)
+
+class Bank(User):
+  def __init__(self, uid):
+    super().__init__()
+    self.uid = uid
+    if not self.get(self.uid):
+      self.add(self.uid)
   @property
   def balance(self):
-    user = self.find_one(uid=self.uid)
+    user = self.get(self.uid)
     return user.get('money', 0)
   
   def add_money(self, amount:int):
