@@ -3,3 +3,4 @@ requests
 bs4
 dataset
 rich
+flask
